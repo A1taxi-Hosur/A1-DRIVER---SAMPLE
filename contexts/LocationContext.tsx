@@ -266,6 +266,36 @@ export function LocationProvider({ children }: LocationProviderProps) {
     }
   }
 
+  const requestLocationPermission = async (): Promise<boolean> => {
+    try {
+      console.log('=== REQUESTING LOCATION PERMISSION ===')
+      
+      if (Platform.OS === 'web') {
+        console.log('✅ Web platform - permission assumed granted')
+        setLocationPermission(true)
+        return true
+      }
+
+      const { status } = await Location.requestForegroundPermissionsAsync()
+      console.log('Permission request result:', status)
+      
+      const granted = status === 'granted'
+      setLocationPermission(granted)
+      
+      if (granted) {
+        console.log('✅ Location permission granted')
+      } else {
+        console.log('❌ Location permission denied')
+      }
+      
+      return granted
+    } catch (error) {
+      console.error('Error requesting location permission:', error)
+      setLocationPermission(false)
+      return false
+    }
+  }
+
   const updateLocationWithGoogleMaps = async () => {
     if (!driver?.user_id) {
       console.log('❌ No driver available for location update')
