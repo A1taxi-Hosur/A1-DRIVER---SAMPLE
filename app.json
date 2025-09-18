@@ -7,8 +7,7 @@
     "icon": "./assets/images/icon.png",
     "scheme": "taxidriver",
     "userInterfaceStyle": "automatic",
-    "newArchEnabled": true,
-    "jsEngine": "hermes",
+    "newArchEnabled": false,
     "platforms": ["ios", "android", "web"],
     "ios": {
       "supportsTablet": true
@@ -22,7 +21,6 @@
     },
     "web": {
       "bundler": "metro",
-      "output": "static",
       "favicon": "./assets/images/favicon.png"
     },
     "plugins": [
@@ -38,16 +36,5 @@
     "experiments": {
       "typedRoutes": true
     },
-    "runtimeVersion": {
-      "policy": "sdkVersion"
-    },
-    "assetBundlePatterns": [
-      "**/*"
-    ],
-    "extra": {
-      "eas": {
-        "projectId": "taxi-driver-pro"
-      }
-    }
   }
 }
