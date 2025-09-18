@@ -48,10 +48,6 @@ config.transformer = {
 // Optimize serializer for better bundle generation
 config.serializer = {
   ...config.serializer,
-  // Create smaller bundles
-  createModuleIdFactory: () => (path) => {
-    return path.replace(__dirname, '').replace(/\//g, '-').replace(/\./g, '_');
-  },
 };
 
 module.exports = config;
