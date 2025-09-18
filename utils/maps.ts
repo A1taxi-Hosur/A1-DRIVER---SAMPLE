@@ -1,6 +1,6 @@
 import Constants from 'expo-constants';
 
-export const GOOGLE_MAPS_API_KEY = Constants.expoConfig?.extra?.googleMapsApiKey || '';
+export const GOOGLE_MAPS_API_KEY = '';
 
 /**
  * Open Google Maps with navigation to a specific destination

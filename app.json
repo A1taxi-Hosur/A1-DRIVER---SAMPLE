@@ -7,7 +7,7 @@
     "icon": "./assets/images/icon.png",
     "scheme": "taxidriver",
     "userInterfaceStyle": "automatic",
-    "newArchEnabled": false,
+    "newArchEnabled": true,
     "ios": {
       "supportsTablet": true
     },
@@ -32,12 +32,9 @@
         }
       ]
     ],
-    "extra": {
-      "googleMapsApiKey": "AIzaSyBIHJUk4DuAG7tjp_gIdNhUJdpBKN1eM2Q"
-    },
     "experiments": {
       "typedRoutes": true
     },
-    "sdkVersion": "51.0.0"
+    "runtimeVersion": "1.0.0"
   }
 }
