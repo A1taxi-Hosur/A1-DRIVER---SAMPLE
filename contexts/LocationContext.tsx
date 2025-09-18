@@ -182,9 +182,9 @@ export function LocationProvider({ children }: LocationProviderProps) {
         .upsert(locationData, { onConflict: 'user_id' })
         .select()
 
-      if (insertError) {
+      if (upsertError) {
         // If insert fails, try to update existing record
-        console.log('⚠️ Insert failed, attempting update:', insertError.message)
+        console.log('⚠️ Insert failed, attempting update:', upsertError.message)
         const { data: updateData, error: updateError } = await client
           .from('live_locations')
           .update({
@@ -207,7 +207,7 @@ export function LocationProvider({ children }: LocationProviderProps) {
           console.log('✅ Location record updated successfully:', resultData)
         }
       } else {
-        const resultData = insertData && insertData.length > 0 ? insertData[0] : null
+        const resultData = upsertData && upsertData.length > 0 ? upsertData[0] : null
         console.log('✅ Location record inserted successfully:', resultData)
       }
       
@@ -492,81 +492,6 @@ export function LocationProvider({ children }: LocationProviderProps) {
         if (subscription) {
           setLocationSubscription(subscription)
         }
-      }
-
-      setIsTracking(true)
-      console.log('✅ Location tracking started successfully')
-    } catch (error) {
-      console.error('❌ Error starting location tracking:', error)
-    }
-  }
-
-  const stopLocationTracking = () => {
-    console.log('=== STOPPING LOCATION TRACKING ===')
-    
-    if (locationSubscription) {
-      locationSubscription.remove()
-      setLocationSubscription(null)
-      setIsTracking(false)
-      console.log('✅ Location tracking stopped')
-    } else {
-      console.log('⚠️ No active location subscription to stop')
-    }
-  }
-
-  const value = {
-    currentLocation,
-    currentAddress,
-    locationPermission,
-    requestLocationPermission,
-    startLocationTracking,
-    stopLocationTracking,
-    isTracking,
-    updateLocationWithGoogleMaps,
-    forceCreateLocationRecord,
-  }
-
-  return (
-    <LocationContext.Provider value={value}>
-      {children}
-    </LocationContext.Provider>
-  )
-}
-          {
-            accuracy: Location.Accuracy.High,
-            timeInterval: 30000, // 30 seconds
-          try {
-            locationObject = await Location.getCurrentPositionAsync({
-              accuracy: Location.Accuracy.High,
-              timeout: 15000
-            })
-          } catch (locationError) {
-            console.log('⚠️ Native location failed, using fallback coordinates')
-            locationObject = {
-              coords: {
-                latitude: 12.7401984,
-                longitude: 77.824,
-                altitude: null,
-                accuracy: 10,
-                altitudeAccuracy: null,
-                heading: null,
-                speed: null,
-              },
-              timestamp: Date.now(),
-            }
-          }
-            setCurrentLocation(location)
-            
-            const address = await reverseGeocode(
-              location.coords.latitude,
-              location.coords.longitude
-            )
-            setCurrentAddress(address || null)
-            
-            await updateDriverLocationInDatabase(location)
-          }
-        )
-        setLocationSubscription(subscription)
       }
 
       setIsTracking(true)
