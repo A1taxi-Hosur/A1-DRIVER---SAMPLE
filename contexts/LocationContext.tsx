@@ -304,8 +304,142 @@ export function LocationProvider({ children }: LocationProviderProps) {
 
     try {
       console.log('=== UPDATING LOCATION WITH GOOGLE MAPS ===')
+      
+      // Get current location using Google Maps API or fallback
+      let locationData = null
+      
+      if (Platform.OS === 'web') {
+        locationData = await getCurrentLocationWithGoogleMaps()
+      } else {
+        const nativeLocation = await Location.getCurrentPositionAsync({
+          accuracy: Location.Accuracy.High,
+          timeout: 10000
+        })
+        locationData = {
+          latitude: nativeLocation.coords.latitude,
+          longitude: nativeLocation.coords.longitude,
+          accuracy: nativeLocation.coords.accuracy
+        }
+      }
+      
+      if (locationData) {
+        // Update local state
+        setCurrentLocation({
+          coords: {
+            latitude: locationData.latitude,
+            longitude: locationData.longitude,
+            accuracy: locationData.accuracy || 10,
+            altitude: null,
+            altitudeAccuracy: null,
+            heading: null,
+            speed: null
+          },
+          timestamp: Date.now()
+        })
+        
+        // Get address
+        const address = await reverseGeocode(locationData.latitude, locationData.longitude)
+        setCurrentAddress(address)
+        
+        // Update database
+        const client = supabaseAdmin || supabase
+        await client
+          .from('live_locations')
+          .update({
+            latitude: locationData.latitude,
+            longitude: locationData.longitude,
+            accuracy: locationData.accuracy || 10,
+            updated_at: new Date().toISOString()
+          })
+          .eq('user_id', driver.user_id)
+        
+        console.log('✅ Location updated successfully')
+      }
     } catch (error) {
       console.error('Error updating location with Google Maps:', error)
+    }
+  }
+
+  const startLocationTracking = () => {
+    if (!driver?.user_id) {
+      console.log('❌ No driver available for location tracking')
+      return
+    }
+
+    if (isTracking) {
+      console.log('⚠️ Location tracking already active')
+      return
+    }
+
+    console.log('=== STARTING LOCATION TRACKING ===')
+    
+    if (Platform.OS === 'web') {
+      // For web, use periodic updates with Google Maps API
+      console.log('🌐 Starting web-based location tracking')
+      setIsTracking(true)
+      
+      const trackingInterval = setInterval(async () => {
+        try {
+          await updateLocationWithGoogleMaps()
+        } catch (error) {
+          console.error('Error in web location tracking:', error)
+        }
+      }, 30000) // Update every 30 seconds
+      
+      // Store interval ID for cleanup
+      setLocationSubscription({ remove: () => clearInterval(trackingInterval) } as any)
+      
+    } else {
+      // For native platforms, use expo-location
+      console.log('📱 Starting native location tracking')
+      
+      Location.watchPositionAsync(
+        {
+          accuracy: Location.Accuracy.High,
+          timeInterval: 30000, // 30 seconds
+          distanceInterval: 10, // 10 meters
+        },
+        async (locationObject) => {
+          try {
+            console.log('📍 New location received:', locationObject.coords)
+            
+            // Update local state
+            setCurrentLocation(locationObject)
+            
+            // Get address
+            const address = await reverseGeocode(
+              locationObject.coords.latitude,
+              locationObject.coords.longitude
+            )
+            setCurrentAddress(address)
+            
+            // Update database
+            const client = supabaseAdmin || supabase
+            await client
+              .from('live_locations')
+              .update({
+                latitude: locationObject.coords.latitude,
+                longitude: locationObject.coords.longitude,
+                heading: locationObject.coords.heading,
+                speed: locationObject.coords.speed,
+                accuracy: locationObject.coords.accuracy,
+                updated_at: new Date().toISOString()
+              })
+              .eq('user_id', driver.user_id)
+            
+            console.log('✅ Location updated in database')
+          } catch (error) {
+            console.error('Error processing location update:', error)
+          }
+        }
+      ).then((subscription) => {
+        setLocationSubscription(subscription)
+        setIsTracking(true)
+        console.log('✅ Native location tracking started')
+      }).catch((error) => {
+        console.error('❌ Failed to start native location tracking:', error)
+        setIsTracking(false)
+      })
     }
   }
 
