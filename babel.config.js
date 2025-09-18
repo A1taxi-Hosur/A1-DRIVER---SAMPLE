@@ -6,8 +6,6 @@ module.exports = function (api) {
     ],
     plugins: [
       'react-native-reanimated/plugin',
-      // Add inline requires for better performance
-      ['@babel/plugin-transform-modules-commonjs', { lazy: true }],
     ],
     env: {
       production: {
