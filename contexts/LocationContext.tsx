@@ -452,7 +452,7 @@ export function LocationProvider({ children }: LocationProviderProps) {
         const intervalId = setInterval(async () => {
           console.log('🔄 Interval location update...')
           await updateLocationWithGoogleMaps()
-        }, 30000) // Update every 30 seconds
+        }, 30000); // Update every 30 seconds
 
         setLocationSubscription({ remove: () => clearInterval(intervalId) } as any)
       } else {
