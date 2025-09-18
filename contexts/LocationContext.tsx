@@ -274,6 +274,8 @@ export function LocationProvider({ children }: LocationProviderProps) {
 
     try {
       console.log('=== UPDATING LOCATION WITH GOOGLE MAPS ===')
+    } catch (error) {
+      console.error('Error updating location with Google Maps:', error)
     }
   }
 
