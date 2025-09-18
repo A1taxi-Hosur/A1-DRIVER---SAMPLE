@@ -274,6 +274,8 @@ export function LocationProvider({ children }: LocationProviderProps) {
 
     try {
       console.log('=== UPDATING LOCATION WITH GOOGLE MAPS ===')
+    }
+  }
 
   const stopLocationTracking = () => {
     console.log('=== STOPPING LOCATION TRACKING ===')
