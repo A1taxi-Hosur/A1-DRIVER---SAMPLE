@@ -8,8 +8,6 @@ config.resolver = {
   platforms: ['ios', 'android', 'native', 'web'],
   sourceExts: [...config.resolver.sourceExts, 'sql', 'json'],
   assetExts: [...config.resolver.assetExts.filter(ext => ext !== 'svg'), 'svg'],
-  unstable_enablePackageExports: true,
-  unstable_conditionNames: ['react-native', 'browser', 'default'],
 };
 
 // Remove complex transformer configurations that can cause issues
