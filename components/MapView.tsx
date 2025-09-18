@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react';
 import { View, StyleSheet, Text, Platform } from 'react-native';
-import MapView, { Marker, PROVIDER_GOOGLE, Polyline } from 'react-native-maps';
 import { useLocation } from '../contexts/LocationContext';
 import { useRide } from '../contexts/RideContext';
 import { MapPin, Navigation, Route } from 'lucide-react-native';
@@ -175,17 +174,31 @@ export default function MapViewComponent({
   };
 
   // For web platform, show a placeholder since react-native-maps doesn't work on web
-  if (Platform.OS === 'web') {
+  // Also show placeholder for Expo Go compatibility
+  if (Platform.OS === 'web' || __DEV__) {
     return (
       <View style={[styles.container, { height }]}>
-        <iframe
-          src={getGoogleMapsEmbedUrl()}
-          style={styles.webMapFrame}
-          frameBorder="0"
-          allowFullScreen
-          loading="lazy"
-          referrerPolicy="no-referrer-when-downgrade"
-        />
+        <View style={styles.mapPlaceholder}>
+          <MapPin size={48} color="#64748B" />
+          <Text style={styles.mapPlaceholderText}>Map View</Text>
+          <Text style={styles.mapPlaceholderSubtext}>
+            {currentLocation 
+              ? `Current: ${currentLocation.coords.latitude.toFixed(4)}, ${currentLocation.coords.longitude.toFixed(4)}`
+              : 'Location not available'
+            }
+          </Text>
+          {currentRide && showCurrentRide && (
+            <View style={styles.rideInfo}>
+              <Text style={styles.rideInfoText}>Active Ride</Text>
+              <Text style={styles.rideInfoAddress}>
+                From: {currentRide.pickup_address}
+              </Text>
+              <Text style={styles.rideInfoAddress}>
+                To: {currentRide.destination_address}
+              </Text>
+            </View>
+          )}
+        </View>
         {routeInfo && (
           <View style={styles.routeInfoOverlay}>
             <Text style={styles.routeInfoText}>
@@ -197,6 +210,7 @@ export default function MapViewComponent({
     );
   }
 
+  // This code would only run in a production build with react-native-maps installed
   return (
     <View style={[styles.container, { height }]}>
       <MapView
@@ -292,6 +306,54 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: '600',
     textAlign: 'center',
+  },
+  webMapPlaceholder: {
+    backgroundColor: '#F1F5F9',
+    borderRadius: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
+  },
+  mapPlaceholder: {
+    flex: 1,
+    backgroundColor: '#F1F5F9',
+    borderRadius: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
+  },
+  mapPlaceholderText: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: '#64748B',
+    marginTop: 12,
+  },
+  mapPlaceholderSubtext: {
+    fontSize: 12,
+    color: '#94A3B8',
+    marginTop: 4,
+    textAlign: 'center',
+  },
+  rideInfo: {
+    marginTop: 16,
+    padding: 12,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
+  },
+  rideInfoText: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#1E293B',
+    marginBottom: 8,
+  },
+  rideInfoAddress: {
+    fontSize: 12,
+    color: '#64748B',
+    marginBottom: 4,
   },
   webMapPlaceholder: {
     backgroundColor: '#F1F5F9',

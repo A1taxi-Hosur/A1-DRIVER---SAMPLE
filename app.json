@@ -7,7 +7,7 @@
     "icon": "./assets/images/icon.png",
     "scheme": "taxidriver",
     "userInterfaceStyle": "automatic",
-    "newArchEnabled": true,
+    "newArchEnabled": false,
     "ios": {
       "supportsTablet": true
     },
@@ -19,7 +19,7 @@
     },
     "web": {
       "bundler": "metro",
-      "output": "single",
+      "output": "static",
       "favicon": "./assets/images/favicon.png"
     },
     "plugins": [
@@ -37,6 +37,7 @@
     },
     "experiments": {
       "typedRoutes": true
-    }
+    },
+    "sdkVersion": "51.0.0"
   }
 }

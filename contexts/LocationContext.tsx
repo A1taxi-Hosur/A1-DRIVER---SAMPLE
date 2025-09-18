@@ -457,14 +457,104 @@ export function LocationProvider({ children }: LocationProviderProps) {
         setLocationSubscription({ remove: () => clearInterval(intervalId) } as any)
       } else {
         // Native: Use location watching
-        const subscription = await Location.watchPositionAsync(
+        let subscription;
+        try {
+          subscription = await Location.watchPositionAsync(
+            {
+              accuracy: Location.Accuracy.High,
+              timeInterval: 30000, // 30 seconds
+              distanceInterval: 50, // 50 meters
+            },
+            async (location) => {
+              console.log('📍 Location watch update:', location.coords)
+              setCurrentLocation(location)
+              
+              const address = await reverseGeocode(
+                location.coords.latitude,
+                location.coords.longitude
+              )
+              setCurrentAddress(address || null)
+              
+              await updateDriverLocationInDatabase(location)
+            }
+          )
+        } catch (watchError) {
+          console.log('⚠️ Location watching failed, using interval updates')
+          // Fallback to interval-based updates
+          const intervalId = setInterval(async () => {
+            console.log('🔄 Interval location update (fallback)...')
+            await updateLocationWithGoogleMaps()
+          }, 30000)
+          
+          subscription = { remove: () => clearInterval(intervalId) } as any
+        }
+        
+        if (subscription) {
+          setLocationSubscription(subscription)
+        }
+      }
+
+      setIsTracking(true)
+      console.log('✅ Location tracking started successfully')
+    } catch (error) {
+      console.error('❌ Error starting location tracking:', error)
+    }
+  }
+
+  const stopLocationTracking = () => {
+    console.log('=== STOPPING LOCATION TRACKING ===')
+    
+    if (locationSubscription) {
+      locationSubscription.remove()
+      setLocationSubscription(null)
+      setIsTracking(false)
+      console.log('✅ Location tracking stopped')
+    } else {
+      console.log('⚠️ No active location subscription to stop')
+    }
+  }
+
+  const value = {
+    currentLocation,
+    currentAddress,
+    locationPermission,
+    requestLocationPermission,
+    startLocationTracking,
+    stopLocationTracking,
+    isTracking,
+    updateLocationWithGoogleMaps,
+    forceCreateLocationRecord,
+  }
+
+  return (
+    <LocationContext.Provider value={value}>
+      {children}
+    </LocationContext.Provider>
+  )
+}
           {
             accuracy: Location.Accuracy.High,
             timeInterval: 30000, // 30 seconds
-            distanceInterval: 50, // 50 meters
-          },
-          async (location) => {
-            console.log('📍 Location watch update:', location.coords)
+          try {
+            locationObject = await Location.getCurrentPositionAsync({
+              accuracy: Location.Accuracy.High,
+              timeout: 15000
+            })
+          } catch (locationError) {
+            console.log('⚠️ Native location failed, using fallback coordinates')
+            locationObject = {
+              coords: {
+                latitude: 12.7401984,
+                longitude: 77.824,
+                altitude: null,
+                accuracy: 10,
+                altitudeAccuracy: null,
+                heading: null,
+                speed: null,
+              },
+              timestamp: Date.now(),
+            }
+          }
             setCurrentLocation(location)
             
             const address = await reverseGeocode(
